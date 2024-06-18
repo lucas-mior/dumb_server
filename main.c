@@ -53,9 +53,9 @@ int main()
 
   // server internet socket address
   struct sockaddr_in serverAddress;
-  serverAddress.sin_family = AF_INET;                     // IPv4
-  serverAddress.sin_port = htons(PORT);                   // port number in network byte order (host-to-network short)
-  serverAddress.sin_addr.s_addr = htonl(INADDR_LOOPBACK); // localhost (host to network long)
+  serverAddress.sin_family = AF_INET;                // IPv4
+  serverAddress.sin_port = htons(PORT);              // port number in network byte order (host-to-network short)
+  serverAddress.sin_addr.s_addr = htonl(INADDR_ANY); // localhost (host to network long)
 
   // socket of type IPv4 using TCP protocol
   serverSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -64,15 +64,13 @@ int main()
   setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
   // bind socket to address
-  if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
-  {
-    printf("Error: The server is not bound to the address.\n");
-    return 1;
+  if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
+      printf("Error: The server is not bound to the address.\n");
+      return 1;
   }
 
   // listen for connections
-  if (listen(serverSocket, BACKLOG) < 0)
-  {
+  if (listen(serverSocket, BACKLOG) < 0) {
     printf("Error: The server is not listening.\n");
     return 1;
   }
@@ -82,8 +80,7 @@ int main()
   int error = getnameinfo((struct sockaddr *)&serverAddress, sizeof(serverAddress), hostBuffer,
                           sizeof(hostBuffer), serviceBuffer, sizeof(serviceBuffer), 0);
 
-  if (error != 0)
-  {
+  if (error != 0) {
     printf("Error: %s\n", gai_strerror(error));
     return 1;
   }
