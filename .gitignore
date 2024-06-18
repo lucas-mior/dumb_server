@@ -1,3 +1,5 @@
 dummy
 tags
 .tags.vim
+compile_commands.json
+.cache/
