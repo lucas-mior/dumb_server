@@ -1,11 +1,12 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h> // signal handling
 #include <time.h>   // time
 
-#include <netdb.h>  // getnameinfo
 #include <sys/socket.h> // socket APIs
+#include <netdb.h>  // getnameinfo
 #include <netinet/in.h> // sockaddr_in
 #include <unistd.h>     // open, close
 
@@ -37,26 +38,27 @@ int main(int argc, char **argv) {
 
   if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
       printf("Error: The server is not bound to the address.\n");
-      return 1;
+      exit(EXIT_FAILURE);
   }
 
   if (listen(serverSocket, BACKLOG) < 0) {
-    printf("Error: The server is not listening.\n");
-    return 1;
+      printf("Error: The server is not listening.\n");
+      exit(EXIT_FAILURE);
   }
 
-  char hostBuffer[NI_MAXHOST], serviceBuffer[NI_MAXSERV];
+  char hostBuffer[NI_MAXHOST];
+  char serviceBuffer[NI_MAXSERV];
   int error = getnameinfo((struct sockaddr *)&serverAddress, sizeof(serverAddress), hostBuffer,
                           sizeof(hostBuffer), serviceBuffer, sizeof(serviceBuffer), 0);
 
   if (error != 0) {
       printf("Error: %s\n", gai_strerror(error));
-      return 1;
+      exit(EXIT_FAILURE);
   }
 
   printf("\nServer is listening on http://%s:%s/\n\n", hostBuffer, serviceBuffer);
 
-  while (1) {
+  while (true) {
     request = (char *)malloc(SIZE * sizeof(char));
     char method[10], route[100];
 
