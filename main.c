@@ -4,6 +4,7 @@
 #include <string.h>
 #include <signal.h>
 #include <time.h>
+#include <errno.h>
 
 #include <sys/socket.h>
 #include <netdb.h>
@@ -37,12 +38,14 @@ int main(int argc, char **argv) {
     setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
     if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
-        printf("Error: The server is not bound to the address.\n");
+        fprintf(stderr, "Error binding %d to %d: %s\n",
+                         serverSocket, serverAddress.sin_addr.s_addr, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     if (listen(serverSocket, BACKLOG) < 0) {
-        printf("Error: The server is not listening.\n");
+        fprintf(stderr, "Error listening to %d: %s\n",
+                        serverSocket, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
