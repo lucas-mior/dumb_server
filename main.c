@@ -21,7 +21,7 @@ void handleSignal(int signal);
 
 void getTimeString(char *buffer);
 
-int serverSocket;
+int server_socket;
 int clientSocket;
 
 char *request;
@@ -29,35 +29,35 @@ char *request;
 int main(int argc, char **argv) {
     signal(SIGINT, handleSignal);
 
-    struct sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
-    serverAddress.sin_port = htons(PORT);
-    serverAddress.sin_addr.s_addr = htonl(INADDR_ANY);
+    struct sockaddr_in server_address;
+    server_address.sin_family = AF_INET;
+    server_address.sin_port = htons(PORT);
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
-    serverSocket = socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+    server_socket = socket(AF_INET, SOCK_STREAM, 0);
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
 
-    if (bind(serverSocket, (struct sockaddr *)&serverAddress, sizeof(serverAddress)) < 0) {
+    if (bind(server_socket, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
         fprintf(stderr, "Error binding %d to %d: %s\n",
-                         serverSocket, serverAddress.sin_addr.s_addr, strerror(errno));
+                         server_socket, server_address.sin_addr.s_addr, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    if (listen(serverSocket, BACKLOG) < 0) {
+    if (listen(server_socket, BACKLOG) < 0) {
         fprintf(stderr, "Error listening to %d: %s\n",
-                        serverSocket, strerror(errno));
+                        server_socket, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
     char hostBuffer[NI_MAXHOST];
     char serviceBuffer[NI_MAXSERV];
-    int error = getnameinfo((struct sockaddr *)&serverAddress, sizeof(serverAddress),
+    int error = getnameinfo((struct sockaddr *)&server_address, sizeof(server_address),
                             hostBuffer, sizeof(hostBuffer),
                             serviceBuffer, sizeof(serviceBuffer), 0);
 
     if (error) {
         fprintf(stderr, "Error getting name info from %d: %s\n",
-                        serverAddress.sin_addr.s_addr, gai_strerror(error));
+                        server_address.sin_addr.s_addr, gai_strerror(error));
         exit(EXIT_FAILURE);
     }
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
         char request[SIZE];
         char method[10], route[100];
 
-        clientSocket = accept(serverSocket, NULL, NULL);
+        clientSocket = accept(server_socket, NULL, NULL);
         read(clientSocket, request, SIZE);
 
         sscanf(request, "%s %s", method, route);
@@ -167,7 +167,7 @@ void handleSignal(int signal) {
         printf("\nShutting down server...\n");
 
         close(clientSocket);
-        close(serverSocket);
+        close(server_socket);
 
         if (request != NULL)
             free(request);
