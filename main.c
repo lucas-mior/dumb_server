@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     printf("\nServer is listening on http://%s:%s/\n\n", hostBuffer, serviceBuffer);
 
     while (true) {
-        request = (char *)malloc(SIZE * sizeof(char));
+        char request[SIZE];
         char method[10], route[100];
 
         clientSocket = accept(serverSocket, NULL, NULL);
@@ -72,8 +72,6 @@ int main(int argc, char **argv) {
 
         sscanf(request, "%s %s", method, route);
         printf("%s %s", method, route);
-
-        free(request);
 
         if (strcmp(method, "GET") != 0) {
             const char response[] = "HTTP/1.1 400 Bad Request\r\n\n";
