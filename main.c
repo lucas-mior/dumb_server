@@ -55,8 +55,9 @@ int main(int argc, char **argv) {
                             hostBuffer, sizeof(hostBuffer),
                             serviceBuffer, sizeof(serviceBuffer), 0);
 
-    if (error != 0) {
-        printf("Error: %s\n", gai_strerror(error));
+    if (error) {
+        fprintf(stderr, "Error getting name info from %d: %s\n",
+                        serverAddress.sin_addr.s_addr, gai_strerror(error));
         exit(EXIT_FAILURE);
     }
 
