@@ -18,7 +18,7 @@ void getFileURL(char *route, char *fileURL);
 void getMimeType(char *file, char *mime);
 void handleSignal(int signal);
 
-void getTimeString(char *buf);
+void getTimeString(char *buffer);
 
 int serverSocket;
 int clientSocket;
@@ -175,9 +175,9 @@ void handleSignal(int signal) {
     return;
 }
 
-void getTimeString(char *buf) {
-    time_t now = time(0);
+void getTimeString(char *buffer) {
+    time_t now = time(NULL);
     struct tm tm = *gmtime(&now);
-    strftime(buf, sizeof buf, "%a, %d %b %Y %H:%M:%S %Z", &tm);
+    strftime(buffer, sizeof (buffer), "%a, %d %b %Y %H:%M:%S %Z", &tm);
     return;
 }
