@@ -99,33 +99,38 @@ int main(void) {
                 send(client_socket, response, sizeof (response), 0);
             } else {
                 char response_header[SIZE];
+                char *response_buffer = NULL;
+                char *pointer = NULL;
                 char time_buffer[100];
                 char mime_type[32];
                 int header_size;
                 int fsize;
-                struct stat filestat;
 
                 get_time_string(time_buffer);
                 get_mime_type(file_url, mime_type);
 
-                snprintf(response_header, sizeof (response_header),
-                        "HTTP/1.1 200 OK\r\nDate: %s\r\nContent-Type: %s\r\n\n",
-                        time_buffer, mime_type);
-                header_size = (int) strlen(response_header);
+                header_size = snprintf(response_header,
+                                       sizeof (response_header),
+                                       "HTTP/1.1 200 OK\r\n"
+                                       "Date: %s\r\nContent-Type: %s\r\n\n",
+                                       time_buffer, mime_type);
 
                 printf(" %s", mime_type);
 
-                if (fstat(file, &filestat) < 0) {
-                    fprintf(stderr, "Error in fstat(): %s\n", strerror(errno));
+                {
+                    struct stat filestat;
+                    if (fstat(file, &filestat) < 0) {
+                        fprintf(stderr, "Error in fstat(): %s\n", strerror(errno));
+                        exit(EXIT_FAILURE);
+                    }
+                    fsize = filestat.st_size;
                 }
-                fsize = filestat.st_size;
-                printf("fsize: %ld\n", filestat.st_size);
 
-                char *response_buffer = malloc(fsize + header_size);
+                response_buffer = malloc(fsize + header_size);
                 strcpy(response_buffer, response_header);
 
-                char *file_buffer = response_buffer + header_size;
-                int w = read(file, file_buffer, fsize);
+                pointer = response_buffer + header_size;
+                int w = read(file, pointer, fsize);
                 if (w < 0) {
                     printf("error reading: %s\n", strerror(errno));
                 }
