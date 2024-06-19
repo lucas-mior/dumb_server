@@ -124,7 +124,6 @@ int main(void) {
         }
 
         get_file_url(route, file_url);
-        printf("fileurl:%s\n", file_url);
 
         if ((file = open(file_url, O_RDWR)) < 0) {
             const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
