@@ -5,7 +5,6 @@
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
-#include <stdint.h>
 #include <limits.h>
 
 #include <linux/limits.h>
@@ -85,6 +84,15 @@ int main(void) {
     while (true) {
         char request[SIZE];
         char method[10], route[100];
+        int file;
+        char file_url[PATH_MAX];
+        char response_header[SIZE];
+        char *response_buffer = NULL;
+        char *pointer = NULL;
+        char time_buffer[100];
+        char mime_type[32];
+        int header_size;
+        uint fsize;
 
         client_socket = accept(server_socket, NULL, NULL);
         read(client_socket, request, SIZE);
@@ -97,8 +105,6 @@ int main(void) {
             send(client_socket, response, sizeof (response), 0);
             goto close_socket;
         }
-        int file;
-        char file_url[PATH_MAX];
 
         get_file_url(route, file_url);
         printf("fileurl:%s\n", file_url);
@@ -108,14 +114,6 @@ int main(void) {
             send(client_socket, response, sizeof (response), 0);
             goto close_socket;
         }
-        char response_header[SIZE];
-        char *response_buffer = NULL;
-        char *pointer = NULL;
-        char time_buffer[100];
-        char mime_type[32];
-        int header_size;
-        ssize_t r;
-        uint fsize;
 
         get_time_string(time_buffer);
         get_mime_type(file_url, mime_type);
@@ -156,9 +154,13 @@ int main(void) {
 
         pointer = response_buffer + header_size;
 
-        r = read(file, pointer, fsize);
-        if (r < 0) {
-            printf("error reading: %s\n", strerror(errno));
+        {
+            ssize_t r = read(file, pointer, fsize);
+            if (r < 0) {
+                fprintf(stderr, "Error reading %s: %s\n",
+                                file_url, strerror(errno));
+                exit(EXIT_FAILURE);
+            }
         }
 
         if (send(client_socket, response_buffer,
@@ -176,7 +178,10 @@ close_socket:
 }
 
 void get_file_url(char *route, char *file_url) {
-    char *question = strrchr(route, '?');
+    char *dot;
+    char *question;
+
+    question = strrchr(route, '?');
     if (question)
         *question = '\0';
 
@@ -187,7 +192,7 @@ void get_file_url(char *route, char *file_url) {
     strcpy(file_url, "htdocs");
     strcat(file_url, route);
 
-    const char *dot = strrchr(file_url, '.');
+    dot = strrchr(file_url, '.');
     if (!dot || dot == file_url) {
         strcat(file_url, ".html");
     }
