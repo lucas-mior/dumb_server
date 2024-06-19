@@ -23,7 +23,7 @@ PREFIX="${PREFIX:-/usr/local}"
 DESTDIR="${DESTDIR:-/}"
 
 main="main.c"
-program="dummy"
+program="dumb_server"
 
 CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros "
