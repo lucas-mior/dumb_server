@@ -58,9 +58,9 @@ int main(int argc, char **argv) {
     char host_buffer[NI_MAXHOST];
     char service_buffer[NI_MAXSERV];
     int error = getnameinfo((struct sockaddr *)&server_address,
-                            sizeof(server_address),
-                            host_buffer, sizeof(host_buffer),
-                            service_buffer, sizeof(service_buffer), 0);
+                            sizeof (server_address),
+                            host_buffer, sizeof (host_buffer),
+                            service_buffer, sizeof (service_buffer), 0);
 
     if (error) {
         fprintf(stderr, "Error getting name info from %d: %s\n",
@@ -83,7 +83,7 @@ int main(int argc, char **argv) {
 
         if (strcmp(method, "GET") != 0) {
             const char response[] = "HTTP/1.1 400 Bad Request\r\n\n";
-            send(client_socket, response, sizeof(response), 0);
+            send(client_socket, response, sizeof (response), 0);
         } else {
             char file_url[100];
 
@@ -92,7 +92,7 @@ int main(int argc, char **argv) {
             FILE *file = fopen(file_url, "r");
             if (!file) {
                 const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
-                send(client_socket, response, sizeof(response), 0);
+                send(client_socket, response, sizeof (response), 0);
             } else {
                 char response_header[SIZE];
                 char time_buffer[100];
