@@ -68,7 +68,8 @@ int main(void) {
 
         if (error) {
             fprintf(stderr, "Error getting name info from %d: %s\n",
-                            server_address.sin_addr.s_addr, gai_strerror(error));
+                            server_address.sin_addr.s_addr,
+                            gai_strerror(error));
             exit(EXIT_FAILURE);
         }
 
