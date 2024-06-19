@@ -95,80 +95,81 @@ int main(void) {
         if (strcmp(method, "GET") != 0) {
             const char response[] = "HTTP/1.1 400 Bad Request\r\n\n";
             send(client_socket, response, sizeof (response), 0);
-        } else {
-            int file;
-            char file_url[PATH_MAX];
-
-            get_file_url(route, file_url);
-            printf("fileurl:%s\n", file_url);
-
-            if ((file = open(file_url, O_RDWR)) < 0) {
-                const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
-                send(client_socket, response, sizeof (response), 0);
-            } else {
-                char response_header[SIZE];
-                char *response_buffer = NULL;
-                char *pointer = NULL;
-                char time_buffer[100];
-                char mime_type[32];
-                int header_size;
-                ssize_t r;
-                uint fsize;
-
-                get_time_string(time_buffer);
-                get_mime_type(file_url, mime_type);
-
-                header_size = snprintf(response_header,
-                                       sizeof (response_header),
-                                       "HTTP/1.1 200 OK\r\n"
-                                       "Date: %s\r\nContent-Type: %s\r\n\n",
-                                       time_buffer, mime_type);
-                if (header_size < 0) {
-                    fprintf(stderr, "Error in snprintf.\n");
-                    exit(EXIT_FAILURE);
-                }
-
-                printf(" %s", mime_type);
-
-                {
-                    struct stat filestat;
-                    if (fstat(file, &filestat) < 0) {
-                        fprintf(stderr, "Error in fstat(): %s\n", strerror(errno));
-                        exit(EXIT_FAILURE);
-                    }
-                    if (filestat.st_size > UINT_MAX) {
-                        fprintf(stderr, "File size is too large:\n");
-                        fprintf(stderr, "%s: %zu", file_url, filestat.st_size);
-                        exit(EXIT_FAILURE);
-                    }
-                    if (filestat.st_size <= 0) {
-                        fprintf(stderr, "File size is zero:\n");
-                        fprintf(stderr, "%s: %zu", file_url, filestat.st_size);
-                        exit(EXIT_FAILURE);
-                    }
-                    fsize = (uint) filestat.st_size;
-                }
-
-                response_buffer = malloc(fsize + (uint) header_size);
-                strcpy(response_buffer, response_header);
-
-                pointer = response_buffer + header_size;
-
-                r = read(file, pointer, fsize);
-                if (r < 0) {
-                    printf("error reading: %s\n", strerror(errno));
-                }
-
-                if (send(client_socket, response_buffer,
-                         fsize + (uint) header_size, 0) < 0) {
-                    fprintf(stderr, "Error sending response: %s\n",
-                                    strerror(errno));
-                    exit(EXIT_FAILURE);
-                }
-                free(response_buffer);
-                close(file);
-            }
+            goto close_socket;
         }
+        int file;
+        char file_url[PATH_MAX];
+
+        get_file_url(route, file_url);
+        printf("fileurl:%s\n", file_url);
+
+        if ((file = open(file_url, O_RDWR)) < 0) {
+            const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
+            send(client_socket, response, sizeof (response), 0);
+            goto close_socket;
+        }
+        char response_header[SIZE];
+        char *response_buffer = NULL;
+        char *pointer = NULL;
+        char time_buffer[100];
+        char mime_type[32];
+        int header_size;
+        ssize_t r;
+        uint fsize;
+
+        get_time_string(time_buffer);
+        get_mime_type(file_url, mime_type);
+
+        header_size = snprintf(response_header,
+                               sizeof (response_header),
+                               "HTTP/1.1 200 OK\r\n"
+                               "Date: %s\r\nContent-Type: %s\r\n\n",
+                               time_buffer, mime_type);
+        if (header_size < 0) {
+            fprintf(stderr, "Error in snprintf.\n");
+            exit(EXIT_FAILURE);
+        }
+
+        printf(" %s", mime_type);
+
+        {
+            struct stat filestat;
+            if (fstat(file, &filestat) < 0) {
+                fprintf(stderr, "Error in fstat(): %s\n", strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            if (filestat.st_size > UINT_MAX) {
+                fprintf(stderr, "File size is too large:\n");
+                fprintf(stderr, "%s: %zu", file_url, filestat.st_size);
+                exit(EXIT_FAILURE);
+            }
+            if (filestat.st_size <= 0) {
+                fprintf(stderr, "File size is zero:\n");
+                fprintf(stderr, "%s: %zu", file_url, filestat.st_size);
+                exit(EXIT_FAILURE);
+            }
+            fsize = (uint) filestat.st_size;
+        }
+
+        response_buffer = malloc(fsize + (uint) header_size);
+        strcpy(response_buffer, response_header);
+
+        pointer = response_buffer + header_size;
+
+        r = read(file, pointer, fsize);
+        if (r < 0) {
+            printf("error reading: %s\n", strerror(errno));
+        }
+
+        if (send(client_socket, response_buffer,
+                 fsize + (uint) header_size, 0) < 0) {
+            fprintf(stderr, "Error sending response: %s\n",
+                            strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        free(response_buffer);
+        close(file);
+close_socket:
         close(client_socket);
         printf("\n");
     }
