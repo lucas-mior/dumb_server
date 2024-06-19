@@ -23,6 +23,11 @@
 #define PORT 2728
 #define BACKLOG 10
 
+typedef unsigned char uchar;
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+
 void get_file_url(char *route, char *file_url);
 void get_mime_type(char *file, char *mime);
 void handle_signal(int signal);
@@ -107,6 +112,7 @@ int main(void) {
                 char time_buffer[100];
                 char mime_type[32];
                 int header_size;
+                ssize_t r;
                 uint fsize;
 
                 get_time_string(time_buffer);
@@ -117,6 +123,10 @@ int main(void) {
                                        "HTTP/1.1 200 OK\r\n"
                                        "Date: %s\r\nContent-Type: %s\r\n\n",
                                        time_buffer, mime_type);
+                if (header_size < 0) {
+                    fprintf(stderr, "Error in snprintf.\n");
+                    exit(EXIT_FAILURE);
+                }
 
                 printf(" %s", mime_type);
 
@@ -136,19 +146,21 @@ int main(void) {
                         fprintf(stderr, "%s: %zu", file_url, filestat.st_size);
                         exit(EXIT_FAILURE);
                     }
-                    fsize = filestat.st_size;
+                    fsize = (uint) filestat.st_size;
                 }
 
-                response_buffer = malloc(fsize + header_size);
+                response_buffer = malloc(fsize + (uint) header_size);
                 strcpy(response_buffer, response_header);
 
                 pointer = response_buffer + header_size;
-                int w = read(file, pointer, fsize);
-                if (w < 0) {
+
+                r = read(file, pointer, fsize);
+                if (r < 0) {
                     printf("error reading: %s\n", strerror(errno));
                 }
 
-                send(client_socket, response_buffer, fsize + header_size, 0);
+                send(client_socket, response_buffer,
+                     fsize + (uint) header_size, 0);
                 free(response_buffer);
                 close(file);
             }
