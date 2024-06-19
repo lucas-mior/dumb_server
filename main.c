@@ -55,12 +55,12 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    char hostBuffer[NI_MAXHOST];
-    char serviceBuffer[NI_MAXSERV];
+    char host_buffer[NI_MAXHOST];
+    char service_buffer[NI_MAXSERV];
     int error = getnameinfo((struct sockaddr *)&server_address,
                             sizeof(server_address),
-                            hostBuffer, sizeof(hostBuffer),
-                            serviceBuffer, sizeof(serviceBuffer), 0);
+                            host_buffer, sizeof(host_buffer),
+                            service_buffer, sizeof(service_buffer), 0);
 
     if (error) {
         fprintf(stderr, "Error getting name info from %d: %s\n",
@@ -69,7 +69,7 @@ int main(int argc, char **argv) {
     }
 
     printf("\nServer is listening on http://%s:%s/\n\n",
-           hostBuffer, serviceBuffer);
+           host_buffer, service_buffer);
 
     while (true) {
         char request[SIZE];
