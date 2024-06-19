@@ -3,3 +3,4 @@ tags
 .tags.vim
 compile_commands.json
 .cache/
+dumb_server
