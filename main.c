@@ -15,9 +15,9 @@
 #define PORT 2728
 #define BACKLOG 10
 
-void getFileURL(char *route, char *fileURL);
-void getMimeType(char *file, char *mime);
-void handleSignal(int signal);
+void get_file_url(char *route, char *fileURL);
+void get_mime_type(char *file, char *mime);
+void handle_signal(int signal);
 
 void getTimeString(char *buffer);
 
@@ -29,7 +29,7 @@ char *request;
 int main(int argc, char **argv) {
     (void) argc;
     (void) argv;
-    signal(SIGINT, handleSignal);
+    signal(SIGINT, handle_signal);
 
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
         } else {
             char fileURL[100];
 
-            getFileURL(route, fileURL);
+            get_file_url(route, fileURL);
 
             FILE *file = fopen(fileURL, "r");
             if (!file) {
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
                 getTimeString(timeBuf);
 
                 char mimeType[32];
-                getMimeType(fileURL, mimeType);
+                get_mime_type(fileURL, mimeType);
 
                 sprintf(resHeader,
                         "HTTP/1.1 200 OK\r\nDate: %s\r\nContent-Type: %s\r\n\n",
@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
     exit(EXIT_SUCCESS);
 }
 
-void getFileURL(char *route, char *fileURL) {
+void get_file_url(char *route, char *fileURL) {
     char *question = strrchr(route, '?');
     if (question)
         *question = '\0';
@@ -149,7 +149,7 @@ void getFileURL(char *route, char *fileURL) {
     return;
 }
 
-void getMimeType(char *file, char *mime) {
+void get_mime_type(char *file, char *mime) {
     const char *dot = strrchr(file, '.');
 
     if (dot == NULL)
@@ -172,7 +172,7 @@ void getMimeType(char *file, char *mime) {
     return;
 }
 
-void handleSignal(int signal) {
+void handle_signal(int signal) {
     if (signal == SIGINT) {
         printf("\nShutting down server...\n");
 
