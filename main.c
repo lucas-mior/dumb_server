@@ -27,6 +27,8 @@ int clientSocket;
 char *request;
 
 int main(int argc, char **argv) {
+    (void) argc;
+    (void) argv;
     signal(SIGINT, handleSignal);
 
     struct sockaddr_in server_address;
@@ -35,11 +37,15 @@ int main(int argc, char **argv) {
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
-    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR, &(int){1}, sizeof(int));
+    setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR,
+               &(int){1}, sizeof (int));
 
-    if (bind(server_socket, (struct sockaddr *) &server_address, sizeof(server_address)) < 0) {
+    if (bind(server_socket,
+             (struct sockaddr *) &server_address,
+             sizeof (server_address)) < 0) {
         fprintf(stderr, "Error binding %d to %d: %s\n",
-                         server_socket, server_address.sin_addr.s_addr, strerror(errno));
+                         server_socket, server_address.sin_addr.s_addr,
+                         strerror(errno));
         exit(EXIT_FAILURE);
     }
 
@@ -51,7 +57,8 @@ int main(int argc, char **argv) {
 
     char hostBuffer[NI_MAXHOST];
     char serviceBuffer[NI_MAXSERV];
-    int error = getnameinfo((struct sockaddr *)&server_address, sizeof(server_address),
+    int error = getnameinfo((struct sockaddr *)&server_address,
+                            sizeof(server_address),
                             hostBuffer, sizeof(hostBuffer),
                             serviceBuffer, sizeof(serviceBuffer), 0);
 
@@ -61,7 +68,8 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    printf("\nServer is listening on http://%s:%s/\n\n", hostBuffer, serviceBuffer);
+    printf("\nServer is listening on http://%s:%s/\n\n",
+           hostBuffer, serviceBuffer);
 
     while (true) {
         char request[SIZE];
@@ -93,7 +101,9 @@ int main(int argc, char **argv) {
                 char mimeType[32];
                 getMimeType(fileURL, mimeType);
 
-                sprintf(resHeader, "HTTP/1.1 200 OK\r\nDate: %s\r\nContent-Type: %s\r\n\n", timeBuf, mimeType);
+                sprintf(resHeader,
+                        "HTTP/1.1 200 OK\r\nDate: %s\r\nContent-Type: %s\r\n\n",
+                        timeBuf, mimeType);
                 int headerSize = strlen(resHeader);
 
                 printf(" %s", mimeType);
