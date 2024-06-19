@@ -7,11 +7,15 @@
 #include <errno.h>
 
 #include <linux/limits.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <unistd.h>
+
 
 #define SIZE 4096
 #define PORT 2728
@@ -84,49 +88,56 @@ int main(void) {
             const char response[] = "HTTP/1.1 400 Bad Request\r\n\n";
             send(client_socket, response, sizeof (response), 0);
         } else {
-            FILE *file;
+            int file;
             char file_url[PATH_MAX];
 
             get_file_url(route, file_url);
-            file = fopen(file_url, "r");
+            printf("fileurl:%s\n", file_url);
 
-            if (!file) {
+            if ((file = open(file_url, O_RDWR)) < 0) {
                 const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
                 send(client_socket, response, sizeof (response), 0);
             } else {
                 char response_header[SIZE];
                 char time_buffer[100];
                 char mime_type[32];
+                int header_size;
+                int fsize;
+                struct stat filestat;
 
                 get_time_string(time_buffer);
                 get_mime_type(file_url, mime_type);
 
-                sprintf(response_header,
+                snprintf(response_header, sizeof (response_header),
                         "HTTP/1.1 200 OK\r\nDate: %s\r\nContent-Type: %s\r\n\n",
                         time_buffer, mime_type);
-                int header_size = strlen(response_header);
+                header_size = (int) strlen(response_header);
 
                 printf(" %s", mime_type);
 
-                fseek(file, 0, SEEK_END);
-                long fsize = ftell(file);
-                fseek(file, 0, SEEK_SET);
+                if (fstat(file, &filestat) < 0) {
+                    fprintf(stderr, "Error in fstat(): %s\n", strerror(errno));
+                }
+                fsize = filestat.st_size;
+                printf("fsize: %ld\n", filestat.st_size);
 
                 char *response_buffer = malloc(fsize + header_size);
                 strcpy(response_buffer, response_header);
 
                 char *file_buffer = response_buffer + header_size;
-                fread(file_buffer, fsize, 1, file);
+                int w = read(file, file_buffer, fsize);
+                if (w < 0) {
+                    printf("error reading: %s\n", strerror(errno));
+                }
 
                 send(client_socket, response_buffer, fsize + header_size, 0);
                 free(response_buffer);
-                fclose(file);
+                close(file);
             }
         }
         close(client_socket);
         printf("\n");
     }
-    exit(EXIT_SUCCESS);
 }
 
 void get_file_url(char *route, char *file_url) {
