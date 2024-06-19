@@ -5,6 +5,8 @@
 #include <signal.h>
 #include <time.h>
 #include <errno.h>
+#include <stdint.h>
+#include <limits.h>
 
 #include <linux/limits.h>
 #include <sys/stat.h>
@@ -104,7 +106,7 @@ int main(void) {
                 char time_buffer[100];
                 char mime_type[32];
                 int header_size;
-                int fsize;
+                uint fsize;
 
                 get_time_string(time_buffer);
                 get_mime_type(file_url, mime_type);
@@ -121,6 +123,16 @@ int main(void) {
                     struct stat filestat;
                     if (fstat(file, &filestat) < 0) {
                         fprintf(stderr, "Error in fstat(): %s\n", strerror(errno));
+                        exit(EXIT_FAILURE);
+                    }
+                    if (filestat.st_size > UINT_MAX) {
+                        fprintf(stderr, "File size is too large:\n");
+                        fprintf(stderr, "%s: %zu", file_url, filestat.st_size);
+                        exit(EXIT_FAILURE);
+                    }
+                    if (filestat.st_size <= 0) {
+                        fprintf(stderr, "File size is zero:\n");
+                        fprintf(stderr, "%s: %zu", file_url, filestat.st_size);
                         exit(EXIT_FAILURE);
                     }
                     fsize = filestat.st_size;
