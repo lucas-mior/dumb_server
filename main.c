@@ -159,8 +159,12 @@ int main(void) {
                     printf("error reading: %s\n", strerror(errno));
                 }
 
-                send(client_socket, response_buffer,
-                     fsize + (uint) header_size, 0);
+                if (send(client_socket, response_buffer,
+                         fsize + (uint) header_size, 0) < 0) {
+                    fprintf(stderr, "Error sending response: %s\n",
+                                    strerror(errno));
+                    exit(EXIT_FAILURE);
+                }
                 free(response_buffer);
                 close(file);
             }
