@@ -26,18 +26,13 @@ void get_time_string(char *buffer);
 static int server_socket;
 static int client_socket;
 
-char *request;
-
-int main(int argc, char **argv) {
-    (void) argc;
-    (void) argv;
-    signal(SIGINT, handle_signal);
-
+int main(void) {
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 
+    signal(SIGINT, handle_signal);
     server_socket = socket(AF_INET, SOCK_STREAM, 0);
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR,
                &(int){1}, sizeof (int));
@@ -117,7 +112,7 @@ int main(int argc, char **argv) {
                 long fsize = ftell(file);
                 fseek(file, 0, SEEK_SET);
 
-                char *response_buffer = (char *)malloc(fsize + header_size);
+                char *response_buffer = malloc(fsize + header_size);
                 strcpy(response_buffer, response_header);
 
                 char *file_buffer = response_buffer + header_size;
@@ -183,9 +178,6 @@ void handle_signal(int signal) {
 
         close(client_socket);
         close(server_socket);
-
-        if (request != NULL)
-            free(request);
 
         exit(0);
     }
