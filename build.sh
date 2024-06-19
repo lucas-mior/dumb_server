@@ -29,7 +29,7 @@ CFLAGS="$CFLAGS -std=c99 -D_DEFAULT_SOURCE "
 CFLAGS="$CFLAGS -Wextra -Wall -Wno-unused-macros "
 LDFLAGS="$LDFLAGS -lm "
 
-CC=${CC:-cc}
+CC=${CC:-clang}
 if [ $CC = "clang" ]; then
     CFLAGS="$CFLAGS -Weverything "
     CFLAGS="$CFLAGS -Wno-unsafe-buffer-usage -Wno-format-nonliteral "

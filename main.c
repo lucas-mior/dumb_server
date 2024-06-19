@@ -6,6 +6,8 @@
 #include <time.h>
 #include <errno.h>
 
+#include <linux/limits.h>
+
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
@@ -21,8 +23,8 @@ void handle_signal(int signal);
 
 void get_time_string(char *buffer);
 
-int server_socket;
-int client_socket;
+static int server_socket;
+static int client_socket;
 
 char *request;
 
@@ -55,21 +57,23 @@ int main(int argc, char **argv) {
         exit(EXIT_FAILURE);
     }
 
-    char host_buffer[NI_MAXHOST];
-    char service_buffer[NI_MAXSERV];
-    int error = getnameinfo((struct sockaddr *)&server_address,
-                            sizeof (server_address),
-                            host_buffer, sizeof (host_buffer),
-                            service_buffer, sizeof (service_buffer), 0);
+    {
+        char host_name[NI_MAXHOST];
+        char service_name[NI_MAXSERV];
+        int error = getnameinfo((struct sockaddr *)&server_address,
+                                sizeof (server_address),
+                                host_name, sizeof (host_name),
+                                service_name, sizeof (service_name), 0);
 
-    if (error) {
-        fprintf(stderr, "Error getting name info from %d: %s\n",
-                        server_address.sin_addr.s_addr, gai_strerror(error));
-        exit(EXIT_FAILURE);
+        if (error) {
+            fprintf(stderr, "Error getting name info from %d: %s\n",
+                            server_address.sin_addr.s_addr, gai_strerror(error));
+            exit(EXIT_FAILURE);
+        }
+
+        printf("\nServer is listening on http://%s:%s ...\n",
+               host_name, service_name);
     }
-
-    printf("\nServer is listening on http://%s:%s/\n\n",
-           host_buffer, service_buffer);
 
     while (true) {
         char request[SIZE];
@@ -85,11 +89,12 @@ int main(int argc, char **argv) {
             const char response[] = "HTTP/1.1 400 Bad Request\r\n\n";
             send(client_socket, response, sizeof (response), 0);
         } else {
-            char file_url[100];
+            FILE *file;
+            char file_url[PATH_MAX];
 
             get_file_url(route, file_url);
+            file = fopen(file_url, "r");
 
-            FILE *file = fopen(file_url, "r");
             if (!file) {
                 const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
                 send(client_socket, response, sizeof (response), 0);
