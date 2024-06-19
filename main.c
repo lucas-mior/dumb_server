@@ -15,14 +15,14 @@
 #define PORT 2728
 #define BACKLOG 10
 
-void get_file_url(char *route, char *fileURL);
+void get_file_url(char *route, char *file_url);
 void get_mime_type(char *file, char *mime);
 void handle_signal(int signal);
 
-void getTimeString(char *buffer);
+void get_time_string(char *buffer);
 
 int server_socket;
-int clientSocket;
+int client_socket;
 
 char *request;
 
@@ -75,31 +75,31 @@ int main(int argc, char **argv) {
         char request[SIZE];
         char method[10], route[100];
 
-        clientSocket = accept(server_socket, NULL, NULL);
-        read(clientSocket, request, SIZE);
+        client_socket = accept(server_socket, NULL, NULL);
+        read(client_socket, request, SIZE);
 
         sscanf(request, "%s %s", method, route);
         printf("%s %s", method, route);
 
         if (strcmp(method, "GET") != 0) {
             const char response[] = "HTTP/1.1 400 Bad Request\r\n\n";
-            send(clientSocket, response, sizeof(response), 0);
+            send(client_socket, response, sizeof(response), 0);
         } else {
-            char fileURL[100];
+            char file_url[100];
 
-            get_file_url(route, fileURL);
+            get_file_url(route, file_url);
 
-            FILE *file = fopen(fileURL, "r");
+            FILE *file = fopen(file_url, "r");
             if (!file) {
                 const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
-                send(clientSocket, response, sizeof(response), 0);
+                send(client_socket, response, sizeof(response), 0);
             } else {
                 char resHeader[SIZE];
                 char timeBuf[100];
-                getTimeString(timeBuf);
+                get_time_string(timeBuf);
 
                 char mimeType[32];
-                get_mime_type(fileURL, mimeType);
+                get_mime_type(file_url, mimeType);
 
                 sprintf(resHeader,
                         "HTTP/1.1 200 OK\r\nDate: %s\r\nContent-Type: %s\r\n\n",
@@ -118,18 +118,18 @@ int main(int argc, char **argv) {
                 char *fileBuffer = resBuffer + headerSize;
                 fread(fileBuffer, fsize, 1, file);
 
-                send(clientSocket, resBuffer, fsize + headerSize, 0);
+                send(client_socket, resBuffer, fsize + headerSize, 0);
                 free(resBuffer);
                 fclose(file);
             }
         }
-        close(clientSocket);
+        close(client_socket);
         printf("\n");
     }
     exit(EXIT_SUCCESS);
 }
 
-void get_file_url(char *route, char *fileURL) {
+void get_file_url(char *route, char *file_url) {
     char *question = strrchr(route, '?');
     if (question)
         *question = '\0';
@@ -138,12 +138,12 @@ void get_file_url(char *route, char *fileURL) {
         strcat(route, "index.html");
     }
 
-    strcpy(fileURL, "htdocs");
-    strcat(fileURL, route);
+    strcpy(file_url, "htdocs");
+    strcat(file_url, route);
 
-    const char *dot = strrchr(fileURL, '.');
-    if (!dot || dot == fileURL) {
-        strcat(fileURL, ".html");
+    const char *dot = strrchr(file_url, '.');
+    if (!dot || dot == file_url) {
+        strcat(file_url, ".html");
     }
 
     return;
@@ -176,7 +176,7 @@ void handle_signal(int signal) {
     if (signal == SIGINT) {
         printf("\nShutting down server...\n");
 
-        close(clientSocket);
+        close(client_socket);
         close(server_socket);
 
         if (request != NULL)
@@ -187,7 +187,7 @@ void handle_signal(int signal) {
     return;
 }
 
-void getTimeString(char *buffer) {
+void get_time_string(char *buffer) {
     time_t now = time(NULL);
     struct tm tm = *gmtime(&now);
     strftime(buffer, sizeof (buffer), "%a, %d %b %Y %H:%M:%S %Z", &tm);
