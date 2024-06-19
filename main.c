@@ -94,32 +94,32 @@ int main(int argc, char **argv) {
                 const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
                 send(client_socket, response, sizeof(response), 0);
             } else {
-                char resHeader[SIZE];
-                char timeBuf[100];
-                get_time_string(timeBuf);
+                char response_header[SIZE];
+                char time_buffer[100];
+                get_time_string(time_buffer);
 
-                char mimeType[32];
-                get_mime_type(file_url, mimeType);
+                char mime_type[32];
+                get_mime_type(file_url, mime_type);
 
-                sprintf(resHeader,
+                sprintf(response_header,
                         "HTTP/1.1 200 OK\r\nDate: %s\r\nContent-Type: %s\r\n\n",
-                        timeBuf, mimeType);
-                int headerSize = strlen(resHeader);
+                        time_buffer, mime_type);
+                int header_size = strlen(response_header);
 
-                printf(" %s", mimeType);
+                printf(" %s", mime_type);
 
                 fseek(file, 0, SEEK_END);
                 long fsize = ftell(file);
                 fseek(file, 0, SEEK_SET);
 
-                char *resBuffer = (char *)malloc(fsize + headerSize);
-                strcpy(resBuffer, resHeader);
+                char *response_buffer = (char *)malloc(fsize + header_size);
+                strcpy(response_buffer, response_header);
 
-                char *fileBuffer = resBuffer + headerSize;
-                fread(fileBuffer, fsize, 1, file);
+                char *file_buffer = response_buffer + header_size;
+                fread(file_buffer, fsize, 1, file);
 
-                send(client_socket, resBuffer, fsize + headerSize, 0);
-                free(resBuffer);
+                send(client_socket, response_buffer, fsize + header_size, 0);
+                free(response_buffer);
                 fclose(file);
             }
         }
