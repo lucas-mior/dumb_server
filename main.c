@@ -96,9 +96,9 @@ int main(void) {
             } else {
                 char response_header[SIZE];
                 char time_buffer[100];
-                get_time_string(time_buffer);
-
                 char mime_type[32];
+
+                get_time_string(time_buffer);
                 get_mime_type(file_url, mime_type);
 
                 sprintf(response_header,
