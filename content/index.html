@@ -6,6 +6,41 @@
   <body>
     <h1>Dumb header from dumb page</h1>
     <p>Dumb content</p>
+    <div>
     <img width=200 src="c-logo.png" alt="C programming language logo">
+    </div>
+
+    <h2> Server source code </h2>
+    <pre>
+    <code id="ccode">
+    </code>
+    </pre>
+
+    <h2> HTML source code </h2>
+    <pre>
+    <code id="htmlcode">
+    </code>
+    </pre>
+
+    <script>
+        function setUpCanvas() {
+            canvas0 = document.getElementById("ccode");
+            fetch("main.c")
+              .then((res) => res.text())
+              .then((text) => {
+                canvas0.textContent = text
+               })
+              .catch((e) => console.error(e));
+
+            canvas = document.getElementById("htmlcode");
+            fetch("index.html")
+              .then((res) => res.text())
+              .then((text) => {
+                canvas.textContent = text
+               })
+              .catch((e) => console.error(e));
+        }
+        window.addEventListener('resize', setUpCanvas, false);
+    </script>
   </body>
 </html>
