@@ -109,10 +109,18 @@ int main(void) {
         char time_buffer[100];
         char mime_type[32];
         int header_size;
+        ssize_t r;
         uint fsize;
 
         client_socket = accept(server_socket, NULL, NULL);
-        read(client_socket, request, SIZE);
+        if ((r = read(client_socket, request, SIZE)) < 0) {
+            fprintf(stderr, "Error reading from client: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
+        if (r == 0) {
+            fprintf(stderr, "Read nothing from client. Exiting...\n");
+            exit(EXIT_FAILURE);
+        }
 
         sscanf(request, "%s %s", method, route);
         printf("%s %s", method, route);
@@ -123,7 +131,26 @@ int main(void) {
             goto close_socket;
         }
 
-        get_file_url(route, file_url);
+        {
+            char *dot;
+            char *question;
+
+            question = strrchr(route, '?');
+            if (question)
+                *question = '\0';
+
+            if (route[strlen(route) - 1] == '/') {
+                strcat(route, "index.html");
+            }
+
+            strcpy(file_url, "content");
+            strcat(file_url, route);
+
+            dot = strrchr(file_url, '.');
+            if (!dot || dot == file_url) {
+                strcat(file_url, ".html");
+            }
+        }
 
         if ((file = open(file_url, O_RDWR)) < 0) {
             const char response[] = "HTTP/1.1 404 Not Found\r\n\n";
@@ -191,29 +218,6 @@ close_socket:
         close(client_socket);
         printf("\n");
     }
-}
-
-void get_file_url(char *route, char *file_url) {
-    char *dot;
-    char *question;
-
-    question = strrchr(route, '?');
-    if (question)
-        *question = '\0';
-
-    if (route[strlen(route) - 1] == '/') {
-        strcat(route, "index.html");
-    }
-
-    strcpy(file_url, "content");
-    strcat(file_url, route);
-
-    dot = strrchr(file_url, '.');
-    if (!dot || dot == file_url) {
-        strcat(file_url, ".html");
-    }
-
-    return;
 }
 
 void get_mime_type(char *file, char *mime) {

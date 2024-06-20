@@ -17,24 +17,27 @@
     <pre><code id="htmlcode"></code></pre>
 
     <script>
-        function setUpCanvas() {
-            canvas0 = document.getElementById("ccode");
-            fetch("main.c")
-              .then((res) => res.text())
-              .then((text) => {
-                canvas0.textContent = text
-               })
-              .catch((e) => console.error(e));
+        document.addEventListener("DOMContentLoaded", function() {
+            function setUpCanvas() {
+                canvas0 = document.getElementById("ccode");
+                fetch("main.c")
+                  .then((res) => res.text())
+                  .then((text) => {
+                    canvas0.textContent = text
+                   })
+                  .catch((e) => console.error(e));
 
-            canvas = document.getElementById("htmlcode");
-            fetch("index.html")
-              .then((res) => res.text())
-              .then((text) => {
-                canvas.textContent = text
-               })
-              .catch((e) => console.error(e));
-        }
-        window.addEventListener('resize', setUpCanvas, false);
+                canvas = document.getElementById("htmlcode");
+                fetch("index.html")
+                  .then((res) => res.text())
+                  .then((text) => {
+                    canvas.textContent = text
+                   })
+                  .catch((e) => console.error(e));
+            }
+            setUpCanvas();
+            window.addEventListener('resize', setUpCanvas, false);
+        }, false);
     </script>
   </body>
 </html>
