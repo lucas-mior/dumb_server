@@ -34,7 +34,6 @@
 #include <netinet/in.h>
 #include <unistd.h>
 
-
 #define SIZE 4096
 #define PORT 2728
 #define BACKLOG 10
@@ -44,11 +43,9 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
-void get_file_url(char *route, char *file_url);
-void get_mime_type(char *file, char *mime);
-void handle_signal(int signal);
-
-void get_time_string(char *buffer);
+static void get_mime_type(char *file, char *mime);
+static void get_time_string(char *buffer);
+static void handle_signal(int signal);
 
 static int server_socket;
 static int client_socket;
@@ -246,6 +243,13 @@ void get_mime_type(char *file, char *mime) {
     return;
 }
 
+void get_time_string(char *buffer) {
+    time_t now = time(NULL);
+    struct tm tm = *gmtime(&now);
+    strftime(buffer, sizeof (buffer), "%a, %d %b %Y %H:%M:%S %Z", &tm);
+    return;
+}
+
 void handle_signal(int signal) {
     if (signal == SIGINT) {
         printf("\nShutting down server...\n");
@@ -255,12 +259,5 @@ void handle_signal(int signal) {
 
         exit(0);
     }
-    return;
-}
-
-void get_time_string(char *buffer) {
-    time_t now = time(NULL);
-    struct tm tm = *gmtime(&now);
-    strftime(buffer, sizeof (buffer), "%a, %d %b %Y %H:%M:%S %Z", &tm);
     return;
 }
