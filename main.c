@@ -109,17 +109,20 @@ int main(void) {
         char time_buffer[100];
         char mime_type[32];
         int header_size;
-        ssize_t r;
         uint fsize;
 
-        client_socket = accept(server_socket, NULL, NULL);
-        if ((r = read(client_socket, request, SIZE)) < 0) {
-            fprintf(stderr, "Error reading from client: %s\n", strerror(errno));
-            exit(EXIT_FAILURE);
-        }
-        if (r == 0) {
-            fprintf(stderr, "Read nothing from client. Exiting...\n");
-            exit(EXIT_FAILURE);
+        {
+            ssize_t r;
+            client_socket = accept(server_socket, NULL, NULL);
+            if ((r = read(client_socket, request, SIZE)) < 0) {
+                fprintf(stderr, "Error reading from client: %s\n",
+                                strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+            if (r == 0) {
+                fprintf(stderr, "Read nothing from client. Exiting...\n");
+                exit(EXIT_FAILURE);
+            }
         }
 
         sscanf(request, "%s %s", method, route);
