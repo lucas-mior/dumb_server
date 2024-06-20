@@ -43,7 +43,6 @@ typedef unsigned short ushort;
 typedef unsigned int uint;
 typedef unsigned long ulong;
 
-static void get_mime_type(char *file, char *mime);
 static void handle_signal(int signal);
 
 static int server_socket;
@@ -103,7 +102,7 @@ int main(void) {
         char *response_buffer = NULL;
         char *pointer = NULL;
         char time_buffer[128];
-        char mime_type[32];
+        char mime[32];
         int header_size;
         uint fsize;
 
@@ -164,19 +163,39 @@ int main(void) {
                      "%a, %d %b %Y %H:%M:%S %Z", &tm);
         }
 
-        get_mime_type(file_url, mime_type);
+        {
+            const char *dot = strrchr(file_url, '.');
+
+            if (dot == NULL)
+                strcpy(mime, "text/html");
+            else if (strcmp(dot, ".html") == 0)
+                strcpy(mime, "text/html");
+            else if (strcmp(dot, ".css") == 0)
+                strcpy(mime, "text/css");
+            else if (strcmp(dot, ".js") == 0)
+                strcpy(mime, "application/js");
+            else if (strcmp(dot, ".jpg") == 0)
+                strcpy(mime, "image/jpeg");
+            else if (strcmp(dot, ".png") == 0)
+                strcpy(mime, "image/png");
+            else if (strcmp(dot, ".gif") == 0)
+                strcpy(mime, "image/gif");
+            else
+                strcpy(mime, "text/html");
+        }
+
 
         header_size = snprintf(response_header,
                                sizeof (response_header),
                                "HTTP/1.1 200 OK\r\n"
                                "Date: %s\r\nContent-Type: %s\r\n\n",
-                               time_buffer, mime_type);
+                               time_buffer, mime);
         if (header_size < 0) {
             fprintf(stderr, "Error in snprintf.\n");
             exit(EXIT_FAILURE);
         }
 
-        printf(" %s", mime_type);
+        printf(" %s", mime);
 
         {
             struct stat filestat;
@@ -223,29 +242,6 @@ close_socket:
         close(client_socket);
         printf("\n");
     }
-}
-
-void get_mime_type(char *file, char *mime) {
-    const char *dot = strrchr(file, '.');
-
-    if (dot == NULL)
-        strcpy(mime, "text/html");
-    else if (strcmp(dot, ".html") == 0)
-        strcpy(mime, "text/html");
-    else if (strcmp(dot, ".css") == 0)
-        strcpy(mime, "text/css");
-    else if (strcmp(dot, ".js") == 0)
-        strcpy(mime, "application/js");
-    else if (strcmp(dot, ".jpg") == 0)
-        strcpy(mime, "image/jpeg");
-    else if (strcmp(dot, ".png") == 0)
-        strcpy(mime, "image/png");
-    else if (strcmp(dot, ".gif") == 0)
-        strcpy(mime, "image/gif");
-    else
-        strcpy(mime, "text/html");
-
-    return;
 }
 
 void handle_signal(int signal) {
