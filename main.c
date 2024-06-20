@@ -44,7 +44,6 @@ typedef unsigned int uint;
 typedef unsigned long ulong;
 
 static void get_mime_type(char *file, char *mime);
-static void get_time_string(char *buffer);
 static void handle_signal(int signal);
 
 static int server_socket;
@@ -103,7 +102,7 @@ int main(void) {
         char response_header[SIZE];
         char *response_buffer = NULL;
         char *pointer = NULL;
-        char time_buffer[100];
+        char time_buffer[128];
         char mime_type[32];
         int header_size;
         uint fsize;
@@ -158,7 +157,13 @@ int main(void) {
             goto close_socket;
         }
 
-        get_time_string(time_buffer);
+        {
+            time_t now = time(NULL);
+            struct tm tm = *gmtime(&now);
+            strftime(time_buffer, sizeof (time_buffer),
+                     "%a, %d %b %Y %H:%M:%S %Z", &tm);
+        }
+
         get_mime_type(file_url, mime_type);
 
         header_size = snprintf(response_header,
@@ -240,13 +245,6 @@ void get_mime_type(char *file, char *mime) {
     else
         strcpy(mime, "text/html");
 
-    return;
-}
-
-void get_time_string(char *buffer) {
-    time_t now = time(NULL);
-    struct tm tm = *gmtime(&now);
-    strftime(buffer, sizeof (buffer), "%a, %d %b %Y %H:%M:%S %Z", &tm);
     return;
 }
 

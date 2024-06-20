@@ -6,9 +6,24 @@
     <body>
         <h1>Dumb header from dumb page</h1>
         <p>Dumb content</p>
+        <h2> How to replicate this web page </h2>
+        <li> copy C code below into a file named <code>main.c</code> </li>
+        <li> copy HTML code below into a file named <code>index.html</code> </li>
+        <li> compile the C code with the command:
+            <code>gcc main.c -o dumb_server</code>
+        </li>
+        <li> run the server:
+            <code>./dumb_server</code>
+        </li>
+        <li> open the server on your browser:
+            <code>http://localhost:2728</code>
+        </li>
 
         <h2> TODO </h2>
-        <li> blaaaaa </li>
+        <li> Refactor ugly C code (replace bad libc string functions) </li>
+        <li> Sanitize user input </li>
+        <li> Serve over HTTPS </li>
+        <li> Add instructions for replication </li>
         <div>
             <img width=200 src="c-logo.png" alt="C programming language logo">
         </div>
