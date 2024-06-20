@@ -205,7 +205,7 @@ void get_file_url(char *route, char *file_url) {
         strcat(route, "index.html");
     }
 
-    strcpy(file_url, "htdocs");
+    strcpy(file_url, "content");
     strcat(file_url, route);
 
     dot = strrchr(file_url, '.');
