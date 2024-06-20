@@ -1,8 +1,11 @@
 var line1 = new TimeSeries();
 var line2 = new TimeSeries();
+
 setInterval(function() {
-    line1.append(Date.now(), Math.random());
-    line2.append(Date.now(), Math.random());
+    let date = Date.now();
+    console.log("Date: ", date);
+    line1.append(date, Math.random());
+    line2.append(date, Math.random());
 }, 1000);
 
 var smoothie = new SmoothieChart({
@@ -14,6 +17,7 @@ var smoothie = new SmoothieChart({
         verticalSections: 6 
     }
 });
+
 smoothie.addTimeSeries(
     line1,
     { 
@@ -31,10 +35,10 @@ smoothie.addTimeSeries(
     }
 );
 
-smoothie.streamTo(document.getElementById("mycanvas"), 1000);
+smoothie.streamTo(document.getElementById("#plotcanvas"), 1000);
 
 function setUpCanvas() {
-    canvas = document.getElementsByClassName("mycanvas")[0];
+    canvas = document.getElementsByClassName("#plotcanvas")[0];
     ctx = canvas.getContext('2d');
     ctx.translate(0.5, 0.5);
 
@@ -51,3 +55,135 @@ function setUpCanvas() {
 
 window.addEventListener('onload', setUpCanvas, false);
 window.addEventListener('resize', setUpCanvas, false);
+
+/**
+ * client code
+ * Runs in browser
+ */
+// ;(function () {
+// 	"use strict";
+
+// 	// A couple helpers to get elements by ID:
+// 	function qs(sel) { return document.querySelector(sel); }
+// 	function qsa(sel) { return document.querySelectorAll(sel); }
+
+// 	let ws; // the websocket
+
+// 	function parseLocation(url) {
+// 		let a = document.createElement('a');
+// 		a.href = url;
+
+// 		return a;
+// 	}
+
+// 	function escapeHTML(s) {
+// 		return s.replace(/&/g, '&amp;')
+// 			.replace(/</g, '&lt;')
+// 			.replace(/>/g, '&gt;')
+// 			.replace(/'/g, '&apos;')
+// 			.replace(/"/g, '&quot;')
+// 			.replace(/\//g, '&sol;');
+// 	}
+
+// 	function getChatUsername() {
+// 		return qs('#chat-username').value.trim();
+// 	}
+// 	function getChatMessage() {
+// 		return qs('#chat-input').value.trim();
+// 	}
+
+// 	function writeOutput(s) {
+// 		let chatOutput = qs('#chat-output');
+// 		let innerHTML = chatOutput.innerHTML;
+
+// 		let newOutput = innerHTML === ''? s: '<br/>' + s;
+// 		chatOutput.innerHTML = innerHTML + newOutput;
+// 		chatOutput.scrollTop = chatOutput.scrollHeight;
+// 	}
+
+// 	function sendMessage(type, payload) {
+//         let message = JSON.stringify({
+// 			'type': type,
+// 			'payload': payload
+// 		});
+// 		ws.send(message);
+// 	}
+
+// 	function send() {
+// 		sendMessage('chat-message', {
+// 			"username": getChatUsername(),
+// 			"message": getChatMessage()
+// 		});
+
+// 		// Clear the input field after sending
+// 		qs('#chat-input').value = '';
+// 	}
+
+// 	function onChatInputKeyUp(ev) {
+// 		if (ev.keyCode === 13) { // 13 is RETURN
+// 			send();
+// 		}
+// 	}
+
+// 	function onSocketOpen(ev) {
+// 		writeOutput("<i>Connection opened.</i>");
+
+// 		sendMessage('chat-join', {
+// 			"username": getChatUsername()
+// 		});
+// 	}
+
+// 	function onSocketClose(ev) {
+// 		writeOutput("<i>Connection closed.</i>");
+// 	}
+
+// 	function onSocketError(ev) {
+// 		writeOutput("<i>Connection error.</i>");
+// 	}
+
+// 	function onSocketMessage(ev) {
+// 		let msg = JSON.parse(ev.data);
+// 		let payload = msg.payload;
+
+// 		let username = escapeHTML(payload.username);
+
+// 		switch (msg.type) {
+// 			case 'chat-message':
+// 				writeOutput('<b>' + username + ":</b> " + escapeHTML(payload.message));
+// 				break;
+
+// 			case 'chat-join':
+// 				writeOutput('<i><b>' + username + '</b> has joined the chat.</i>');
+// 				break;
+
+// 			case 'chat-leave':
+// 				writeOutput('<i><b>' + username + '</b> has left the chat.</i>');
+// 				break;
+// 		}
+// 	}
+
+// 	function onLoad() {
+// 		let localURL = parseLocation(window.location);
+
+// 		qs('#chat-input').addEventListener('keyup', onChatInputKeyUp);
+// 		qs('#chat-send').addEventListener('click', send);
+
+// 		// Create WebSocket
+// 		ws = new WebSocket("ws://" + localURL.host, "beej-chat-protocol");
+
+// 		ws.addEventListener('open', onSocketOpen);
+// 		ws.addEventListener('close', onSocketClose);
+// 		ws.addEventListener('error', onSocketError);
+// 		ws.addEventListener('message', onSocketMessage);
+
+// 		let userName = getChatUsername().trim();
+
+// 		if (userName === '') {
+// 			qs('#chat-username').value = 'Guest ' +
+// 				((Math.random()*0xffff)|0).toString(16);
+// 		}
+// 	}
+
+// 	// Wait for load event before starting
+// 	window.addEventListener('load', onLoad);
+// }());
