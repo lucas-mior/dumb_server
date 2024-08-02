@@ -102,7 +102,7 @@ int main(void) {
         char *response_buffer = NULL;
         char *pointer = NULL;
         char time_buffer[128];
-        char mime[32];
+        char *mime;
         int header_size;
         uint fsize;
 
@@ -167,21 +167,21 @@ int main(void) {
             const char *dot = strrchr(file_url, '.');
 
             if (dot == NULL)
-                strcpy(mime, "text/html");
+                mime = "text/html";
             else if (strcmp(dot, ".html") == 0)
-                strcpy(mime, "text/html");
+                mime = "text/html";
             else if (strcmp(dot, ".css") == 0)
-                strcpy(mime, "text/css");
+                mime = "text/css";
             else if (strcmp(dot, ".js") == 0)
-                strcpy(mime, "application/js");
+                mime = "application/js";
             else if (strcmp(dot, ".jpg") == 0)
-                strcpy(mime, "image/jpeg");
+                mime = "image/jpeg";
             else if (strcmp(dot, ".png") == 0)
-                strcpy(mime, "image/png");
+                mime = "image/png";
             else if (strcmp(dot, ".gif") == 0)
-                strcpy(mime, "image/gif");
+                mime = "image/gif";
             else
-                strcpy(mime, "text/html");
+                mime = "text/html";
         }
 
 
