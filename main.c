@@ -59,9 +59,10 @@ int main(void) {
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR,
                &(int){1}, sizeof (int));
 
-    if (bind(server_socket,
-             (struct sockaddr *) &server_address,
-             sizeof (server_address)) < 0) {
+    int binded = bind(server_socket,
+                      (struct sockaddr *)&server_address,
+                      sizeof (server_address));
+    if (binded < 0) {
         fprintf(stderr, "Error binding %d to %d: %s\n",
                          server_socket, server_address.sin_addr.s_addr,
                          strerror(errno));
