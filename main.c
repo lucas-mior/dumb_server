@@ -50,6 +50,8 @@ static int client_socket;
 
 int main(void) {
     struct sockaddr_in server_address;
+    int binded;
+
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -59,9 +61,9 @@ int main(void) {
     setsockopt(server_socket, SOL_SOCKET, SO_REUSEADDR,
                &(int){1}, sizeof (int));
 
-    int binded = bind(server_socket,
-                      (struct sockaddr *)&server_address,
-                      sizeof (server_address));
+    binded = bind(server_socket,
+                  (struct sockaddr *)&server_address,
+                  sizeof (server_address));
     if (binded < 0) {
         fprintf(stderr, "Error binding %d to %d: %s\n",
                          server_socket, server_address.sin_addr.s_addr,
