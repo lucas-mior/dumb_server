@@ -184,9 +184,7 @@ int main(void) {
                 mime = "text/html";
         }
 
-
-        header_size = snprintf(response_header,
-                               sizeof (response_header),
+        header_size = snprintf(response_header, sizeof (response_header),
                                "HTTP/1.1 200 OK\r\n"
                                "Date: %s\r\nContent-Type: %s\r\n\n",
                                time_buffer, mime);
